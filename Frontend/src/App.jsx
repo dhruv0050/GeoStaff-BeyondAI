@@ -1,21 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import Login from './components/Login';
-
-// Protected Route Component
-const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/" />;
-};
+import TestPage from './pages/TestPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Router>
       <div className="app">
         <Routes>
-          {/* Public Route */}
-          <Route path="/" element={<Login />} />
+          {/* Public Routes */}
+          <Route path="/" element={<TestPage />} />
+          
+          {/* Protected Routes - Add more routes here as we build them */}
+          {/* Example:
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          */}
         </Routes>
       </div>
     </Router>
