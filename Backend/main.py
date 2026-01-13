@@ -5,7 +5,7 @@ import uvicorn
 
 from config import CORS_ORIGINS, APP_HOST, APP_PORT
 from database import connect_to_mongo, close_mongo_connection
-from routes import health
+from routes import health, auth
 
 
 # Lifespan event handler for startup and shutdown
@@ -37,6 +37,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(health.router)
+app.include_router(auth.router)
 
 
 @app.get("/")

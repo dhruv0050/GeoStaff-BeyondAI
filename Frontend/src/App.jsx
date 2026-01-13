@@ -1,7 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import TestPage from './pages/TestPage';
+import Login from './pages/Login';
+import OTPVerification from './pages/OTPVerification';
+import { EmployeeDashboard, ManagerDashboard, AdminDashboard } from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -10,19 +12,36 @@ function App() {
       <div className="app">
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<TestPage />} />
-          
-          {/* Protected Routes - Add more routes here as we build them */}
-          {/* Example:
+          <Route path="/" element={<Login />} />
+          <Route path="/verify-otp" element={<OTPVerification />} />
+          {/* Protected Routes - Role-based Dashboards */}
           <Route 
-            path="/dashboard" 
+            path="/employee/dashboard" 
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <EmployeeDashboard />
               </ProtectedRoute>
             } 
           />
-          */}
+          <Route 
+            path="/manager/dashboard" 
+            element={
+              <ProtectedRoute>
+                <ManagerDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Fallback route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </Router>
