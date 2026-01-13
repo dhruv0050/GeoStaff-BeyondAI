@@ -217,15 +217,6 @@ const OTPVerification = () => {
               )}
             </div>
           </form>
-
-          <div className="bg-cyan-500/5 border border-cyan-500/10 p-4 rounded-xl mt-6">
-            <p className="text-xs text-gray-400 my-1 font-medium">
-              💡 <strong>Testing:</strong> OTP shown in console
-            </p>
-            <p className="text-xs text-gray-400 my-1 font-medium">
-              🔐 Default: <strong>123456</strong>
-            </p>
-          </div>
         </div>
       </div>
     </div>

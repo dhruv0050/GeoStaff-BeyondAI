@@ -79,11 +79,21 @@ async def verify_otp_endpoint(request: OTPVerifyRequest):
     # Get user from database
     user = await users_collection.find_one({"phone": request.phone})
     
+    # If user doesn't exist (client skipped send-otp), create a basic record
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        new_user = {
+            "phone": request.phone,
+            "name": f"User {request.phone[-4:]}",
+            "role": UserRole.EMPLOYEE.value,
+            "device_id": None,
+            "is_active": True,
+            "location_id": None,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        await users_collection.insert_one(new_user)
+        user = new_user
+        print(f"✨ User auto-created during OTP verify: {request.phone}")
     
     # Update device_id if provided
     if request.device_id:

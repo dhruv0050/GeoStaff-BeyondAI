@@ -22,20 +22,8 @@ const Login = () => {
       return;
     }
 
-    setLoading(true);
-    try {
-      const response = await authService.sendOTP(phone);
-      
-      // Show OTP in console for testing (MVP only)
-      console.log('🔐 OTP:', response.otp);
-      
-      // Navigate to OTP verification page
-      navigate('/verify-otp', { state: { phone } });
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to send OTP. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    // Skip backend "send-otp" and go directly to OTP entry
+    navigate('/verify-otp', { state: { phone } });
   };
 
   const formatPhoneNumber = (value) => {
@@ -102,7 +90,7 @@ const Login = () => {
               disabled={loading || phone.length < 10}
               className="w-full py-4 text-base font-bold text-white bg-[#2e5c6e] hover:bg-[#3a7080] rounded-xl transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Sending OTP...' : 'Send OTP'}
+              {loading ? 'Loading...' : 'Continue'}
             </button>
 
             <p className="text-center text-gray-600 text-xs mt-8 font-medium">
@@ -110,9 +98,6 @@ const Login = () => {
             </p>
 
             <div className="bg-teal-50 border border-teal-200 p-4 rounded-xl mt-2">
-              <p className="text-xs text-gray-700 my-1 font-medium">
-                💡 <strong>Testing:</strong> OTP shown in console
-              </p>
               <p className="text-xs text-gray-700 my-1 font-medium">
                 🔐 Default: <strong>123456</strong>
               </p>

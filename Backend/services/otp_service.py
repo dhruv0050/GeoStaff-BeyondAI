@@ -60,8 +60,12 @@ def verify_otp(phone: str, otp: str) -> bool:
     Returns:
         True if OTP is valid, False otherwise
     """
-    # Check if OTP exists for this phone
+    # If no OTP was generated (e.g., client skipped send-otp),
+    # allow the default MVP OTP "123456" to pass without storage.
     if phone not in otp_storage:
+        if otp == "123456":
+            print(f"✅ OTP verified (no prior generation) for phone: {phone}")
+            return True
         print(f"❌ No OTP found for phone: {phone}")
         return False
     
