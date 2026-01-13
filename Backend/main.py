@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import uvicorn
 
-from config import CORS_ORIGINS, APP_HOST, APP_PORT
+from config import CORS_ORIGINS, CORS_ORIGIN_REGEX, APP_HOST, APP_PORT
 from database import connect_to_mongo, close_mongo_connection
 from routes import health, auth, attendance
 
@@ -26,14 +26,25 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Configure CORS (supports explicit origins and optional regex)
+cors_kwargs = {
+    "allow_credentials": True,
+    "allow_methods": ["*"],
+    "allow_headers": ["*"],
+}
+
+# Always include explicit origins if provided (and not just '*')
+explicit_origins = [o for o in CORS_ORIGINS if o != "*"]
+if explicit_origins:
+    cors_kwargs["allow_origins"] = explicit_origins
+
+# If regex provided, or wildcard '*' present, enable regex mode
+if CORS_ORIGIN_REGEX:
+    cors_kwargs["allow_origin_regex"] = CORS_ORIGIN_REGEX
+elif "*" in CORS_ORIGINS:
+    cors_kwargs["allow_origin_regex"] = ".*"
+
+app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 # Include routers
 app.include_router(health.router)
@@ -52,7 +63,5 @@ async def root():
 
 
 if __name__ == "__main__":
-    print("🚀 Starting GeoStaff API...")
-    print(f"📍 Server running at http://{APP_HOST}:{APP_PORT}")
-    print(f"📚 API Documentation: http://localhost:{APP_PORT}/docs")
+    print("Starting GeoStaff API...")
     uvicorn.run("main:app", host=APP_HOST, port=APP_PORT, reload=True)

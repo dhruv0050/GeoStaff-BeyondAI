@@ -20,4 +20,10 @@ APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
 APP_PORT = int(os.getenv("APP_PORT", 8000))
 
 # CORS Configuration
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000").split(",")
+# Comma-separated list of origins. Example:
+#   CORS_ORIGINS=http://localhost:5173,https://app.example.com
+# Optional regex support via CORS_ORIGIN_REGEX. Example:
+#   CORS_ORIGIN_REGEX=^https://(.*\\.)?example\\.com$
+_cors_origins_raw = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000")
+CORS_ORIGINS = [o.strip() for o in _cors_origins_raw.split(",") if o.strip()]
+CORS_ORIGIN_REGEX = os.getenv("CORS_ORIGIN_REGEX", "")
