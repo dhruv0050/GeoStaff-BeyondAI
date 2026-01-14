@@ -52,12 +52,58 @@ class AttendanceService {
   /**
    * Get attendance history
    */
-  async getAttendanceHistory(page = 1, pageSize = 50) {
-    const response = await api.get('/attendance/history', {
-      params: { page, page_size: pageSize },
+  async getAttendanceHistory(page = 1, pageSize = 50, startDate = null, endDate = null) {
+    const params = { page, page_size: pageSize };
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
+    
+    const response = await api.get('/attendance/history', { params });
+    return response.data;
+  }
+
+  /**
+   * Get recent attendance (last N days)
+   */
+  async getRecentAttendance(days = 7) {
+    const response = await api.get('/attendance/recent', {
+      params: { days },
+    });
+    return response.data;
+  }
+
+  /**
+   * Get monthly summary
+   */
+  async getMonthlySummary(year, month) {
+    const response = await api.get('/attendance/monthly-summary', {
+      params: { year, month },
+    });
+    return response.data;
+  }
+
+  /**
+   * Export attendance data
+   */
+  async exportAttendance(format = 'excel', startDate = null, endDate = null) {
+    const params = { format };
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
+    
+    const response = await api.get('/attendance/export', {
+      params,
+      responseType: 'blob',
     });
     
-    return response.data;
+    // Create download link
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `attendance_${new Date().toISOString().split('T')[0]}.${format === 'csv' ? 'csv' : 'xlsx'}`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    
+    return true;
   }
 
   /**

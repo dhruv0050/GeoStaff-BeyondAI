@@ -3,7 +3,7 @@ Attendance Model
 Schema for attendance records with geolocation tracking
 """
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
+from typing import Optional, Literal, Dict, Any
 from datetime import datetime
 from bson import ObjectId
 
@@ -84,21 +84,21 @@ class AttendanceResponse(BaseModel):
     """Response with attendance record and status"""
     success: bool
     message: str
-    attendance: Optional[AttendanceRecord] = None
+    attendance: Optional[Dict[str, Any]] = None
     hours_worked: Optional[float] = None  # For check-out responses
 
 
 class TodayAttendanceResponse(BaseModel):
     """Today's attendance summary"""
-    check_in: Optional[AttendanceRecord] = None
-    check_out: Optional[AttendanceRecord] = None
+    check_in: Optional[Dict[str, Any]] = None
+    check_out: Optional[Dict[str, Any]] = None
     status: Literal["not-started", "checked-in", "checked-out"]
     hours_worked: Optional[float] = None
 
 
 class AttendanceHistoryResponse(BaseModel):
     """Historical attendance records"""
-    records: list[AttendanceRecord]
+    records: list[Dict[str, Any]]
     total_count: int
     page: int
     page_size: int

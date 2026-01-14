@@ -60,7 +60,15 @@ const AttendanceWidget = ({ onAttendanceChange }) => {
   useEffect(() => {
     fetchTodayAttendance();
     fetchLocation();
-  }, []);
+    
+    // Auto-clear success message after 3 seconds
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   // Start camera
   const startCamera = async () => {
@@ -212,16 +220,26 @@ const AttendanceWidget = ({ onAttendanceChange }) => {
         notes || null
       );
 
-      setSuccess(response.message);
+      console.log('Check-in response:', response);
+      
+      // Show success message regardless of response structure
+      setSuccess(response.message || response.success ? 'Checked in successfully' : 'Check-in failed');
       setCapturedPhoto(null);
       setNotes('');
       
-      // Wait a moment then refresh attendance data
+      // Always refresh attendance data
       setTimeout(() => {
         fetchTodayAttendance();
       }, 500);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to check in');
+      console.error('Check-in error:', err);
+      const errorMsg = err.response?.data?.detail || err.message || 'Failed to check in';
+      setError(errorMsg);
+      
+      // Still try to refresh data as the action might have succeeded
+      setTimeout(() => {
+        fetchTodayAttendance();
+      }, 1000);
     } finally {
       setActionLoading(false);
     }
@@ -231,11 +249,6 @@ const AttendanceWidget = ({ onAttendanceChange }) => {
   const handleCheckOut = async () => {
     if (!location) {
       setError('Location not available. Please enable location services.');
-      return;
-    }
-
-    if (!capturedPhoto) {
-      setError('Photo is required. Please capture a photo.');
       return;
     }
 
@@ -253,16 +266,26 @@ const AttendanceWidget = ({ onAttendanceChange }) => {
         notes || null
       );
 
-      setSuccess(response.message);
+      console.log('Check-out response:', response);
+      
+      // Show success message regardless of response structure
+      setSuccess(response.message || response.success ? 'Checked out successfully' : 'Check-out failed');
       setCapturedPhoto(null);
       setNotes('');
       
-      // Wait a moment then refresh attendance data
+      // Always refresh attendance data
       setTimeout(() => {
         fetchTodayAttendance();
       }, 500);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to check out');
+      console.error('Check-out error:', err);
+      const errorMsg = err.response?.data?.detail || err.message || 'Failed to check out';
+      setError(errorMsg);
+      
+      // Still try to refresh data as the action might have succeeded
+      setTimeout(() => {
+        fetchTodayAttendance();
+      }, 1000);
     } finally {
       setActionLoading(false);
     }
@@ -417,7 +440,7 @@ const AttendanceWidget = ({ onAttendanceChange }) => {
         {/* Check-out Controls */}
         {canCheckOut && (
           <div className="space-y-4">
-            {/* Photo Capture - Mandatory */}
+            {/* Photo Capture - Optional for check-out */}
             <div>
               {capturedPhoto ? (
                 <div className="space-y-3">
@@ -437,13 +460,13 @@ const AttendanceWidget = ({ onAttendanceChange }) => {
               ) : (
                 <button
                   onClick={openCameraModal}
-                  className="w-full flex items-center justify-center gap-2 py-4 px-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl"
+                  className="w-full flex items-center justify-center gap-2 py-4 px-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0118.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
-                  Capture Photo (Required)
+                  Capture Photo (Optional)
                 </button>
               )}
             </div>
@@ -462,7 +485,7 @@ const AttendanceWidget = ({ onAttendanceChange }) => {
             {/* Check-out Button */}
             <button
               onClick={handleCheckOut}
-              disabled={actionLoading || !location || !capturedPhoto}
+              disabled={actionLoading || !location}
               className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
             >
               {actionLoading ? 'Checking Out...' : 'Check Out'}
